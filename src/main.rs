@@ -1,11 +1,10 @@
-mod listener;
+mod audio;
 mod ui;
 
+use crate::ui::volume_bar::VolumeBar;
 use anyhow::Result;
 use gtk4::Application;
 use gtk4::prelude::*;
-
-use crate::ui::VolumeBar;
 
 fn main() -> Result<()> {
     let app = Application::builder()
@@ -18,6 +17,5 @@ fn main() -> Result<()> {
     });
 
     app.run();
-
     Ok(())
 }

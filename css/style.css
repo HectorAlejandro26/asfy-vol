@@ -1,0 +1,56 @@
+window {
+    background: transparent;
+}
+
+.volume-container {
+    box-shadow: -5px 0 20px 2px rgba(166, 227, 161, 0.4),
+                5px 0 20px 2px rgba(137, 220, 235, 0.4);
+    border: 2px solid rgba(151, 224, 198, 0.8);
+    background-image: linear-gradient(45deg, 
+        rgba(30, 30, 46, 0.85) 40%, 
+        rgba(17, 17, 27, 0.85) 100%
+    );
+    border-radius: 15px;
+    padding: 10px 20px;
+}
+
+label {
+    color: #94e2d5;
+    text-shadow: 0px 0px 5px #11111b;
+}
+
+window.muted label {
+    color: #cba6f7;
+}
+
+progressbar trough {
+    background-color: rgba(17, 17, 27, 0.8);
+    border-radius: 10px;
+    min-height: 4px;
+    border: none;
+}
+
+progressbar progress {
+    background-image: linear-gradient(90deg, 
+        #89dceb 20%,
+        #a6e3a1 50%, 
+        #94e2d5 80%
+    );
+    min-height: 4px;
+    border-radius: 10px;
+    border: none;
+}
+
+window.muted .volume-container {
+    box-shadow: -5px 0 20px 2px rgba(203, 166, 247, 0.4),
+                5px 0 20px 2px rgba(245, 194, 231, 0.4);
+    border: 2px solid rgba(180, 190, 254, 0.8);
+}
+
+window.muted progressbar progress {
+    background-image: linear-gradient(90deg, 
+        #cba6f7 20%,
+        #f5c2e7 50%, 
+        #b4befe 80%
+    );
+}
