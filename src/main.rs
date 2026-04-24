@@ -1,8 +1,5 @@
-mod audio;
-mod ui;
-
-use crate::ui::volume_bar::VolumeBar;
 use anyhow::Result;
+use asfy_vol::ui::volume_bar::VolumeBar;
 use gtk4::Application;
 use gtk4::prelude::*;
 

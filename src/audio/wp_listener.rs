@@ -7,7 +7,7 @@ use std::process::{Command, Stdio};
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct CurrentSink {
-    pub volume: f32,
+    pub volume: f64,
     pub muted: bool,
 }
 
@@ -17,7 +17,7 @@ impl CurrentSink {
         let volume = s
             .split_once("Volume: ")
             .map(|(_, val)| val.replace("[MUTED]", ""))
-            .and_then(|val| val.trim().parse::<f32>().ok())
+            .and_then(|val| val.trim().parse::<f64>().ok())
             .ok_or_else(|| anyhow!("Error parsing volume of: {}", s))?;
 
         Ok(Self { muted, volume })

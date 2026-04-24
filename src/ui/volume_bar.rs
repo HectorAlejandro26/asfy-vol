@@ -13,7 +13,7 @@ const STYLESHEET: &str = include_str!("../../css/style.css");
 
 struct IconRange {
     symbol: char,
-    weight: f32,
+    weight: f64,
 }
 
 const VOLUME_ICONS: [IconRange; 3] = [
@@ -150,7 +150,7 @@ impl VolumeBar {
         progress_bar: &ProgressBar,
         sink: CurrentSink,
     ) {
-        let fraction = (sink.volume as f64).clamp(0.0, 1.0);
+        let fraction = sink.volume.clamp(0.0, 1.0);
         progress_bar.set_fraction(fraction);
 
         if sink.muted {
@@ -191,8 +191,8 @@ impl VolumeBar {
     }
 }
 
-fn map_vol_icon(val: f32) -> char {
-    let mut threshold = 0.0;
+fn map_vol_icon(val: f64) -> char {
+    let mut threshold = 0_f64;
     for icon in &VOLUME_ICONS {
         threshold += icon.weight;
         if val <= threshold {
