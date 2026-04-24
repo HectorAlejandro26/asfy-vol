@@ -13,3 +13,4 @@ async-channel = "2.5.0"
 glib = { version = "0.22.5", features = ["v2_88"] }
 gtk4 = { version = "0.11.2", default-features = false, features = ["v4_22"] }
 gtk4-layer-shell = "0.8.0"
+nix = "0.31.2"

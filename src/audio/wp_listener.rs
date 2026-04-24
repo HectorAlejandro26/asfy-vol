@@ -1,6 +1,8 @@
 use anyhow::{Result, anyhow, bail};
 use async_channel::Sender;
+use nix::libc;
 use std::io::{BufRead, BufReader};
+use std::os::unix::process::CommandExt;
 use std::process::{Command, Stdio};
 
 #[derive(Debug, PartialEq, Clone)]
@@ -36,10 +38,16 @@ pub fn get_current_volume() -> Result<CurrentSink> {
 }
 
 pub fn watch_volume_changes(sender: Sender<CurrentSink>) {
-    std::thread::spawn(move || {
+    std::thread::spawn(move || unsafe {
         let mut child = Command::new("pactl")
             .arg("subscribe")
             .stdout(Stdio::piped())
+            .pre_exec(|| {
+                {
+                    libc::prctl(libc::PR_SET_PDEATHSIG, libc::SIGTERM)
+                };
+                Ok(())
+            })
             .spawn()
             .expect("Error executing \"pactl\"");
 
