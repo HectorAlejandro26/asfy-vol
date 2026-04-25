@@ -10,7 +10,7 @@ use std::{
     path::PathBuf,
 };
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Config {
     pub use_percent: bool,
 
@@ -66,6 +66,10 @@ impl Config {
         let mut config: Config = toml::from_str(&content)?;
         config.config_file = Some(file.clone());
         Ok(config)
+    }
+
+    pub fn get_file_path(&self) -> Option<PathBuf> {
+        self.config_file.clone()
     }
 }
 

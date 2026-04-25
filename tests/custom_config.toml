@@ -1,0 +1,13 @@
+use_percent = true
+
+[[thresholds]]
+icon = ""
+level = 0.15
+
+[[thresholds]]
+icon = ""
+level = 0.425
+
+[[thresholds]]
+icon = ""
+level = 0.425
