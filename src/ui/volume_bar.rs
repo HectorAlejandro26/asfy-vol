@@ -1,4 +1,5 @@
 use crate::audio::wp_listener::{CurrentSink, watch_volume_changes};
+use crate::config::Config;
 use glib::clone;
 use gtk4::cairo::{RectangleInt, Region};
 use gtk4::gdk::Display;
@@ -36,10 +37,11 @@ pub struct VolumeBar {
     label: Label,
     progress_bar: ProgressBar,
     timeout_id: Rc<RefCell<Option<glib::SourceId>>>,
+    config: Config,
 }
 
 impl VolumeBar {
-    pub fn new(app: &Application) -> Self {
+    pub fn new(app: &Application, config: Config) -> Self {
         let window = ApplicationWindow::builder()
             .application(app)
             .title("Asfy volume")
@@ -51,7 +53,7 @@ impl VolumeBar {
 
         let label = Label::builder()
             .label(" ")
-            .width_chars(1)
+            .width_chars(if config.use_percent { 4 } else { 1 })
             .halign(Align::End)
             .build();
         let progress_bar = ProgressBar::builder()
@@ -87,6 +89,7 @@ impl VolumeBar {
             label,
             progress_bar,
             timeout_id: Rc::new(RefCell::new(None)),
+            config,
         }
     }
 
@@ -122,6 +125,7 @@ impl VolumeBar {
         watch_volume_changes(sender);
 
         let window = self.window.clone();
+        let config = self.config.clone();
         let label = self.label.clone();
         let progress_bar = self.progress_bar.clone();
         let timeout_id = self.timeout_id.clone();
@@ -129,6 +133,8 @@ impl VolumeBar {
         glib::MainContext::default().spawn_local(clone!(
             #[weak]
             window,
+            #[strong]
+            config,
             #[weak]
             label,
             #[weak]
@@ -137,7 +143,7 @@ impl VolumeBar {
             timeout_id,
             async move {
                 while let Ok(sink) = receiver.recv().await {
-                    Self::update_ui(&window, &label, &progress_bar, sink);
+                    Self::update_ui(&window, &config, &label, &progress_bar, sink);
                     Self::manage_timeout(&window, &timeout_id);
                 }
             }
@@ -146,6 +152,7 @@ impl VolumeBar {
 
     fn update_ui(
         window: &ApplicationWindow,
+        config: &Config,
         label: &Label,
         progress_bar: &ProgressBar,
         sink: CurrentSink,
@@ -157,7 +164,12 @@ impl VolumeBar {
             label.set_text("");
             window.add_css_class("muted");
         } else {
-            label.set_text(&format!("{}", map_vol_icon(sink.volume)));
+            let display_text = if config.use_percent {
+                format!("{}%", (fraction * 100.0).round().clamp(0.0, 100.0) as i32)
+            } else {
+                map_vol_icon(sink.volume).to_string()
+            };
+            label.set_text(&display_text);
             window.remove_css_class("muted");
         }
         window.present();
@@ -191,13 +203,17 @@ impl VolumeBar {
     }
 }
 
-fn map_vol_icon(val: f64) -> char {
+fn map_vol_icon(val: f64) -> String {
     let mut threshold = 0_f64;
     for icon in &VOLUME_ICONS {
         threshold += icon.weight;
         if val <= threshold {
-            return icon.symbol;
+            return icon.symbol.to_string();
         }
     }
-    VOLUME_ICONS.last().map(|i| i.symbol).unwrap_or(' ')
+    VOLUME_ICONS
+        .last()
+        .map(|i| i.symbol)
+        .unwrap_or(' ')
+        .to_string()
 }

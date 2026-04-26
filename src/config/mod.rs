@@ -10,7 +10,7 @@ use std::{
     path::PathBuf,
 };
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Config {
     pub use_percent: bool,
 
