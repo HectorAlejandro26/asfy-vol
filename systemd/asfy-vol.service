@@ -1,0 +1,12 @@
+[Unit]
+Description=Asfy Volume Controller
+After=pipewire.service graphical-session.target
+PartOf=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/asfyvol
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=graphical-session.target
