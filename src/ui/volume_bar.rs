@@ -1,36 +1,18 @@
-use crate::audio::wp_listener::{CurrentSink, watch_volume_changes};
-use crate::config::Config;
 use glib::clone;
-use gtk4::cairo::{RectangleInt, Region};
-use gtk4::gdk::Display;
-use gtk4::{Align, Application, ApplicationWindow, Box, Label, Orientation};
-use gtk4::{CssProvider, STYLE_PROVIDER_PRIORITY_APPLICATION, prelude::*};
-use gtk4::{ProgressBar, style_context_add_provider_for_display};
+use gtk4::{
+    Align, Application, ApplicationWindow, Box, Label, Orientation, ProgressBar,
+    STYLE_PROVIDER_PRIORITY_APPLICATION,
+    cairo::{RectangleInt, Region},
+    gdk::Display,
+    prelude::*,
+    style_context_add_provider_for_display,
+};
 use gtk4_layer_shell::{Edge, KeyboardMode, Layer, LayerShell};
 use std::cell::RefCell;
 use std::rc::Rc;
 
-const STYLESHEET: &str = include_str!("../../css/style.css");
-
-struct IconRange {
-    symbol: char,
-    weight: f64,
-}
-
-const VOLUME_ICONS: [IconRange; 3] = [
-    IconRange {
-        symbol: '\u{f026}',
-        weight: 0.15,
-    },
-    IconRange {
-        symbol: '\u{f027}',
-        weight: 0.425,
-    },
-    IconRange {
-        symbol: '\u{f028}',
-        weight: 0.425,
-    },
-];
+use crate::audio::wp_listener::{CurrentSink, watch_volume_changes};
+use crate::config::Config;
 
 pub struct VolumeBar {
     window: ApplicationWindow,
@@ -81,7 +63,7 @@ impl VolumeBar {
         container.append(&inner_box);
         window.set_child(Some(&container));
 
-        Self::apply_css();
+        Self::apply_css(&config);
         Self::setup_layer_shell(&window);
 
         Self {
@@ -93,9 +75,9 @@ impl VolumeBar {
         }
     }
 
-    fn apply_css() {
-        let provider = CssProvider::new();
-        provider.load_from_string(STYLESHEET);
+    fn apply_css(config: &Config) {
+        let provider = config.get_css_provider();
+
         if let Some(display) = Display::default() {
             style_context_add_provider_for_display(
                 &display,
@@ -167,7 +149,7 @@ impl VolumeBar {
             let display_text = if config.use_percent {
                 format!("{}%", (fraction * 100.0).round().clamp(0.0, 100.0) as i32)
             } else {
-                map_vol_icon(sink.volume).to_string()
+                config.map_vol_icon(fraction)
             };
             label.set_text(&display_text);
             window.remove_css_class("muted");
@@ -201,19 +183,4 @@ impl VolumeBar {
         );
         *timeout_id.borrow_mut() = Some(new_id);
     }
-}
-
-fn map_vol_icon(val: f64) -> String {
-    let mut threshold = 0_f64;
-    for icon in &VOLUME_ICONS {
-        threshold += icon.weight;
-        if val <= threshold {
-            return icon.symbol.to_string();
-        }
-    }
-    VOLUME_ICONS
-        .last()
-        .map(|i| i.symbol)
-        .unwrap_or(' ')
-        .to_string()
 }

@@ -1,8 +1,6 @@
 use anyhow::Result;
-use asfy_vol::config::Config;
-use asfy_vol::ui::volume_bar::VolumeBar;
-use gtk4::Application;
-use gtk4::prelude::*;
+use asfy_vol::{config::Config, ui::volume_bar::VolumeBar};
+use gtk4::{Application, prelude::*};
 
 fn main() -> Result<()> {
     let config = Config::setup(None).unwrap_or_else(|e| {
