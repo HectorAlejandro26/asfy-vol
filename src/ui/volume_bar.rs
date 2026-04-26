@@ -35,7 +35,7 @@ impl VolumeBar {
 
         let label = Label::builder()
             .label(" ")
-            .width_chars(if config.use_percent { 4 } else { 1 })
+            .width_chars(config.get_max_length_string())
             .halign(Align::End)
             .build();
         let progress_bar = ProgressBar::builder()
@@ -143,7 +143,7 @@ impl VolumeBar {
         progress_bar.set_fraction(fraction);
 
         if sink.muted {
-            label.set_text("");
+            label.set_text(&config.muted_text);
             window.add_css_class("muted");
         } else {
             let display_text = if config.use_percent {
@@ -151,6 +151,7 @@ impl VolumeBar {
             } else {
                 config.map_vol_icon(fraction)
             };
+
             label.set_text(&display_text);
             window.remove_css_class("muted");
         }

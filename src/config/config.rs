@@ -8,8 +8,8 @@ use std::{
     path::PathBuf,
 };
 
-/// Devuelve un `PathBuf` que apunta hacia `$XDG_CONFIG_HOME/asfy/asfy-vol`, sin importar si existe
-/// o no
+/// Devuelve un `PathBuf` que apunta hacia `$XDG_CONFIG_HOME/asfy/asfy-vol`,
+/// sin importar si existe o no
 pub fn get_config_dir() -> Result<PathBuf> {
     let config_dir_path = config_dir();
     let app_config_dir_path = config_dir_path.unwrap().join("asfy").join("asfy-vol");
@@ -20,6 +20,8 @@ pub fn get_config_dir() -> Result<PathBuf> {
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 pub struct Config {
     pub use_percent: bool,
+
+    pub muted_text: String,
 
     #[serde(default)]
     pub thresholds: Vec<IconThreshold>,
@@ -112,9 +114,8 @@ impl Config {
         }
         self.thresholds
             .last()
-            .map(|i| i.icon)
-            .unwrap_or(' ')
-            .to_string()
+            .map(|i| i.icon.clone())
+            .unwrap_or(" ".to_string())
     }
 
     pub fn get_css_provider(&self) -> CssProvider {
@@ -130,27 +131,44 @@ impl Config {
 
         provider
     }
+
+    pub fn get_max_length_string(&self) -> i32 {
+        let mut max_length: i32 = 1;
+
+        self.thresholds
+            .iter()
+            .for_each(|i| max_length = std::cmp::max(max_length, i.icon.len() as i32));
+
+        max_length = std::cmp::max(max_length, self.muted_text.len() as i32);
+
+        if self.use_percent {
+            max_length = std::cmp::max(max_length, 4)
+        }
+
+        max_length
+    }
 }
 
 impl Default for Config {
     fn default() -> Self {
         let thresholds = vec![
             IconThreshold {
-                icon: '\u{f026}',
+                icon: "\u{f026}".to_string(),
                 level: 0.15,
             },
             IconThreshold {
-                icon: '\u{f027}',
+                icon: "\u{f027}".to_string(),
                 level: 0.425,
             },
             IconThreshold {
-                icon: '\u{f028}',
+                icon: "\u{f028}".to_string(),
                 level: 0.425,
             },
         ];
 
         Self {
             thresholds,
+            muted_text: "".to_string(),
             use_percent: false,
             config_file: None,
             style_path: None,
