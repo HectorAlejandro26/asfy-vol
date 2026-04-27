@@ -3,12 +3,14 @@
 `asfy-vol` es un indicador de volumen visual desarrollado en Rust utilizando GTK4 y gtk4-layer-shell. Está diseñado para entornos de escritorio que soportan el protocolo Layer Shell (como Wayland/Sway/Hyprland), proporcionando una barra de volumen minimalista que responde a eventos del sistema.
 
 ## Características
+
 - Interfaz construida con GTK4
 - Soporte para Layer Shell (flota sobre otras ventanas)
 - Configurable mediante archivos TOML
 - Manejo de umbrales de iconos dinámicos según el nivel de volumen
 
 ## Instalación
+
 Para compilar el proyecto desde el código fuente, asegúrate de tener instalado el toolchain de Rust y las dependencias de desarrollo de GTK4.
 
 ```bash
@@ -17,6 +19,7 @@ cd asfy-vol
 makepkg -si
 ```
 ## Dependencias principales
+
 - `wireplumber`
 - `gtk4`
 - `gtk4-layer-shell`
@@ -24,6 +27,7 @@ makepkg -si
 - `gcc-libs`
 
 ## Configuración
+
 El programa busca su archivo de configuración en `$XDG_CONFIG_HOME/asfy/asfy-vol/config.toml`. Ejemplo de `config.toml`:
 
 ```toml
@@ -51,3 +55,6 @@ level = 1.0
 - `muted_text`: Texto que se mostrará al mutear el dispositivo.
 - `style_path`: Ruta del archivo CSS.
 
+## Licencia
+
+Este proyecto está bajo la **Licencia MIT**. Consulta el archivo [LICENSE](LICENSE) para más detalles.
