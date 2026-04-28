@@ -6,7 +6,7 @@ arch=('x86_64')
 url="https://github.com/HectorAlejandro26/asfy-vol"
 license=('MIT')
 depends=('wireplumber' 'gtk4' 'gtk4-layer-shell' 'glibc' 'gcc-libs')
-makedepends=('cargo')
+makedepends=('cargo' 'git')
 source=("$pkgname::git+$url.git#tag=v$pkgver")
 md5sums=('SKIP')
 options=('!debug')
