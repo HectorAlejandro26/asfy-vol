@@ -11,8 +11,11 @@ jobs:
       - name: 📦 Descargar código
         uses: actions/checkout@v4
 
+      - name: 🔑 Inicializar pacman keyring
+        run: docker run --rm -v /etc/pacman.d/gnupg:/etc/pacman.d/gnupg archlinux:latest pacman-key --init
+
       - name: 🚀 Subir al Arch User Repository
-        uses: KSXGitHub/github-actions-deploy-aur@v3.0.1
+        uses: KSXGitHub/github-actions-deploy-aur@v4.1.3
         with:
           pkgname: asfy-vol
           pkgbuild: ./PKGBUILD
