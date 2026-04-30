@@ -4,6 +4,8 @@ use nix::libc;
 use std::io::{BufRead, BufReader};
 use std::os::unix::process::CommandExt;
 use std::process::{Command, Stdio};
+use std::sync::mpsc;
+use std::time::Duration;
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct CurrentSink {
@@ -38,14 +40,16 @@ pub fn get_current_volume() -> Result<CurrentSink> {
 }
 
 pub fn watch_volume_changes(sender: Sender<CurrentSink>) {
+    // Canal ligero para mandar la señal
+    let (tx, rx) = mpsc::channel();
+
+    // Hilo 1: lee stdout y avisa.
     std::thread::spawn(move || unsafe {
         let mut child = Command::new("pactl")
             .arg("subscribe")
             .stdout(Stdio::piped())
             .pre_exec(|| {
-                {
-                    libc::prctl(libc::PR_SET_PDEATHSIG, libc::SIGTERM)
-                };
+                libc::prctl(libc::PR_SET_PDEATHSIG, libc::SIGTERM);
                 Ok(())
             })
             .spawn()
@@ -53,16 +57,37 @@ pub fn watch_volume_changes(sender: Sender<CurrentSink>) {
 
         let stdout = child.stdout.take().unwrap();
         let reader = BufReader::new(stdout);
-        let mut last_sink: Option<CurrentSink> = None;
 
         for line in reader.lines().flatten() {
             if line.contains("on sink") || line.contains("on server") {
+                let _ = tx.send(());
+            }
+        }
+    });
+
+    // Hilo 2: Debouncer
+    std::thread::spawn(move || {
+        let mut last_sink: Option<CurrentSink> = None;
+
+        if let Ok(sink) = get_current_volume() {
+            last_sink = Some(sink.clone());
+            let _ = sender.send_blocking(sink);
+        }
+
+        loop {
+            if rx.recv().is_ok() {
                 if let Ok(sink) = get_current_volume() {
                     if Some(&sink) != last_sink.as_ref() {
                         last_sink = Some(sink.clone());
-                        let _ = sender.send_blocking(sink);
+                        let _ = sender.send_blocking(sink.clone());
                     }
                 }
+
+                std::thread::sleep(Duration::from_millis(10));
+
+                while rx.try_recv().is_ok() {}
+            } else {
+                break;
             }
         }
     });
